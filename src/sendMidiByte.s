@@ -1,7 +1,7 @@
 ;
 ; PANIC MIDI - AVR Version
 ; 
-; Copyright (c) 2012-2023 Luc Hondareyte
+; Copyright (c) 2012-2026 Luc Hondareyte
 ; All rights reserved.
 ;
 ; $Id$
@@ -12,8 +12,7 @@
 
 #define	counter	  r18 	// bit counter
 #define	temp	  r19	// char buffer
-
-.extern tx_buffer
+#define	arg	  r24	// function parameter
 
 .global sendMidiByte
 
@@ -29,7 +28,7 @@ sendMidiByte:
 	rcall StartBit          ; c'est parti!
 
 	ldi counter, 8          ; load bit counter
-	lds temp, tx_buffer     ; load char to send
+	mov temp, arg     	; load char to send
 
 NextBit:
 	sbrc temp, 0            ; If temp[0] = 0 -> Call Zero

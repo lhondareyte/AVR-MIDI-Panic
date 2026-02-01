@@ -3,7 +3,7 @@
  *
  * PANIC MIDI - AVR Version
  * 
- * Copyright (c) 2012-2023 Luc Hondareyte
+ * Copyright (c) 2012-2026 Luc Hondareyte
  * All rights reserved.
  *
  * $Id$
@@ -14,7 +14,7 @@
 #include "panic.h"
 
 void SenMessages(void);
-volatile uint8_t tx_buffer;
+//extern void sendMidiByte(uint8_t);
 
 ISR (INT0_vect) {
 	sendMessages();
@@ -23,12 +23,9 @@ ISR (INT0_vect) {
 }
 
 inline void sendMessages(void) {
-
-	// Loop variables
 	uint8_t c;
 	if (bit_is_clear(PORT_SW,RESET_SW)) {
-		tx_buffer=MIDI_RESET_MSG;
-		sendMidiByte();	
+		sendMidiByte(MIDI_RESET_MSG);
 	}
 	else 
 	{
@@ -36,23 +33,17 @@ inline void sendMessages(void) {
 #ifdef __ALL_SOUND_OFF_ENABLE__
 		// Send ALL-SOUND-OFF
 		for (c=0; c<16 ; c++) {
-			tx_buffer=MIDI_CHNMODE_MSG+c;
-			sendMidiByte();	
-			tx_buffer=ALL_SOUND_OFF;
-			sendMidiByte();	
-			tx_buffer=0x00;
-			sendMidiByte();	
+			sendMidiByte(MIDI_CHNMODE_MSG+c);
+			sendMidiByte(ALL_SOUND_OFF);
+			sendMidiByte(0x00);	
 		}
 #endif
 
 		// Send ALL-NOTES-OFF 
 		for (c=0; c<16 ; c++) {
-			tx_buffer=MIDI_CTRLCHG_MSG+c;
-			sendMidiByte();	
-			tx_buffer=ALL_NOTES_OFF;
-			sendMidiByte();	
-			tx_buffer=0x00;
-			sendMidiByte();	
+			sendMidiByte(MIDI_CTRLCHG_MSG+c);
+			sendMidiByte(ALL_NOTES_OFF);
+			sendMidiByte(0x00);	
 		}
 
 #ifdef __LEGACY__
@@ -61,12 +52,9 @@ inline void sendMessages(void) {
 		for (c=0; c<16 ; c++) {
 			c=MIDI_NOTEON_MSG+c;
 			for (i=0; i<128; i++) {
-				tx_buffer=c;
-				sendMidiByte();
-				tx_buffer=i;
-				sendMidiByte();
-				tx_buffer=0x00;
-				sendMidiByte();
+				sendMidiByte(c);
+				sendMidiByte(i);
+				sendMidiByte(0x00);
 			}
 		}
 #endif
@@ -75,10 +63,10 @@ inline void sendMessages(void) {
 
 int main(void)
 {
-	// PINB3+4 on output
+	/* PINB3+4 on output */
 	DDRB=0b00011000;
 
-	// Configure INT0
+	/* Configure INT0 */
 	INTRGST=0x02;
 	INTMSKR=0x40;
 	sei();
